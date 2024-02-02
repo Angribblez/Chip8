@@ -68,12 +68,12 @@ fn main() -> Result<(), String> {
     let mut memory:[u8; 0x1000] = [0; 0x1000];
     let mut display:[u8; 0x800] = [0; 0x800];
     let mut registers:[u8; 0x10] = [0; 0x10];
-    let mut program_counter:usize = 0x200;
-    let mut index_register:u16 = 0x0;
+    let mut program_counter : usize = 0x200;
+    let mut index_register: u16 = 0x0;
     let mut stack:[usize; 0xFF] = [0; 0xFF];
-    let mut stack_index:usize = 0x0;
-    let mut delay_timer:u8 = 0xFF;
-    let mut sound_timer:u8 = 0xFF;
+    let mut stack_index : usize = 0x0;
+    let mut delay_timer: u8 = 0xFF;
+    let mut sound_timer: u8 = 0xFF;
     let mut input:[u8; 0x10] = [0; 0x10];
 
     //font setup
@@ -105,8 +105,8 @@ fn main() -> Result<(), String> {
     }
 
     //opcode loop
-    let mut should_run:bool = true;
-    let mut timer_counter:u8 = 0;
+    let mut should_run = true;
+    let mut timer_counter = 0;
     while should_run {
         //input handling
         for event in event_pump.poll_iter() {
@@ -248,10 +248,10 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF000) == 0x3000 {
             //instruction skip (3XNN) if Vx = NN
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //get value to compare register to
-            let cmp_val:u8 = (opcode & 0x00FF) as u8;
+            let cmp_val: u8 = (opcode & 0x00FF) as u8;
 
             //compare
             if registers[reg_num] == cmp_val {
@@ -260,10 +260,10 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF000) == 0x4000 {
             //instruction skip (4XNN) if Vx != NN
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //get value to compare register to
-            let cmp_val:u8 = (opcode & 0x00FF) as u8;
+            let cmp_val: u8 = (opcode & 0x00FF) as u8;
 
             //compare
             if registers[reg_num] != cmp_val {
@@ -272,8 +272,8 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF00F) == 0x5000 {
             //instruction skip (5XY0) if Vx = Vy
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //compare
             if registers[reg_num_x] == registers[reg_num_y] {
@@ -282,60 +282,60 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF000) == 0x6000 {
             //set register vx (6XNN)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //get value to set register to
-            let reg_val:u8 = (opcode & 0x00FF) as u8;
+            let reg_val: u8 = (opcode & 0x00FF) as u8;
 
             //update register
             registers[reg_num] = reg_val;
         }else if (opcode & 0xF000) == 0x7000 {
             //add value to register vx (7XNN)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //get value to set register to
-            let reg_val:u8 = (opcode & 0x00FF) as u8;
+            let reg_val: u8 = (opcode & 0x00FF) as u8;
 
             //update register
             registers[reg_num] = registers[reg_num].wrapping_add(reg_val);
         }else if (opcode & 0xF00F) == 0x8000 {
             //set value of Vx to value of Vy (8XY0)
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //update register
             registers[reg_num_x] = registers[reg_num_y];
         }else if (opcode & 0xF00F) == 0x8001 {
             //set value of Vx to value of Vx or Vy (8XY1)
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //update register
             registers[reg_num_x] |= registers[reg_num_y];
         }else if (opcode & 0xF00F) == 0x8002 {
             //set value of Vx to value of Vx and Vy (8XY2)
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //update register
             registers[reg_num_x] &= registers[reg_num_y];
         }else if (opcode & 0xF00F) == 0x8003 {
             //set value of Vx to value of Vx xor Vy (8XY3)
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //update register
             registers[reg_num_x] ^= registers[reg_num_y];
         }else if (opcode & 0xF00F) == 0x8004 {
             //set value of Vx to value of Vx + Vy (8XY4), set VF to whether or not there was an overflow
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //check for overflow
             if  registers[reg_num_x].checked_add(registers[reg_num_y]) == None {
@@ -349,8 +349,8 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF00F) == 0x8005 {
             //set value of Vx to value of Vx - Vy (8XY5), set VF to whether or not there was an underflow
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //check for overflow
             if  registers[reg_num_x].checked_sub(registers[reg_num_y]) == None {
@@ -364,8 +364,8 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF00F) == 0x8006 {
             //set value of Vx to value of Vy shifted 1 bit to the right (8XY6), set Vf to the shifted bit
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //update register
             registers[reg_num_x] = registers[reg_num_y];
@@ -374,8 +374,8 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF00F) == 0x8007 {
             //set value of Vx to value of Vy - Vx (8XY7), set VF to whether or not there was an underflow
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //check for overflow
             if  registers[reg_num_y].checked_sub(registers[reg_num_x]) == None {
@@ -389,8 +389,8 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF00F) == 0x800E {
             //set value of Vx to value of Vy shifted 7 bits to the right (8XYE), set Vf to the shifted bit
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //update register
             registers[reg_num_x] = registers[reg_num_y];
@@ -399,8 +399,8 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF00F) == 0x9000 {
             //skip next instruction if Vx != Vy (9XY0)
             //get register numbers
-            let reg_num_x:usize = ((opcode & 0x0F00) >> 0x8) as usize;
-            let reg_num_y:usize = ((opcode & 0x00F0) >> 0x4) as usize;
+            let reg_num_x : usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num_y : usize = ((opcode & 0x00F0) >> 0x4) as usize;
 
             //update register
             if registers[reg_num_x] != registers[reg_num_y] {
@@ -416,10 +416,10 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF000) == 0xC000 {
             //set value of Vx to random & NN (CXNN)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //get value to bitwise and random value with
-            let val:u8 = (opcode & 0x00FF) as u8;
+            let val: u8 = (opcode & 0x00FF) as u8;
 
             //update register
             registers[reg_num] = rand::thread_rng().gen();
@@ -427,9 +427,9 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF000) == 0xD000 {
             //display / draw (DXYN)
             //get coordinates and height
-            let x:u8 = registers[((opcode & 0x0F00) >> 0x8) as usize] % 64;
-            let y:u8 = registers[((opcode & 0x00F0) >> 0x4) as usize] % 32;
-            let h:u8 = (opcode & 0x000F) as u8;
+            let x: u8 = registers[((opcode & 0x0F00) >> 0x8) as usize] % 64;
+            let y: u8 = registers[((opcode & 0x00F0) >> 0x4) as usize] % 32;
+            let h: u8 = (opcode & 0x000F) as u8;
 
             //set VF to 0
             registers[0xF] = 0x0;
@@ -438,14 +438,14 @@ fn main() -> Result<(), String> {
             //iterate through each row to draw
             for n in 0..h {
                 //get row of sprite data from memory at I
-                let row:u8 = memory[(index_register + (n as u16)) as usize];
+                let row: u8 = memory[(index_register + (n as u16)) as usize];
 
                 //loop through each pixel in byte
                 for i in 0..8 {
                     //check if pixel is to be toggled
                     if row & (1<<(7-i)) != 0 {
                         //get screen memory address
-                        let location:usize = ((y as usize) + (n as usize))*64 + (x as usize) + (i as usize);
+                        let location : usize = ((y as usize) + (n as usize))*64 + (x as usize) + (i as usize);
                         //toggle pixel
                         display[location] = display[location].wrapping_add(1);
                         if display[location] == 2 {
@@ -468,7 +468,7 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF0FF) == 0xE09E {
             //skip next instruction if key in VX is pressed (EX9E)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //check register
             if registers[reg_num] < 0x10 {
@@ -480,7 +480,7 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF0FF) == 0xE0A1 {
             //skip next instruction if key in VX is not pressed (EXA1)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //check register
             if registers[reg_num] < 0x10 {
@@ -492,14 +492,14 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF0FF) == 0xF007 {
             //set vx to delay timer (FX07)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //update register
             registers[reg_num] = delay_timer;
         }else if (opcode & 0xF0FF) == 0xF00A {
             //await key press and store code in VX (FX0A)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //loop through inputs
             let mut i = 0;
@@ -518,28 +518,28 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF0FF) == 0xF015 {
             //set delay timer to vx (FX15)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //update timer
             delay_timer = registers[reg_num];
         }else if (opcode & 0xF0FF) == 0xF018 {
             //set sound timer to vx (FX18)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //update timer
             sound_timer = registers[reg_num];
         }else if (opcode & 0xF0FF) == 0xF01E {
             //adds Vx to index register (FX1E)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //update index register
             index_register += registers[reg_num] as u16;
         }else if (opcode & 0xF0FF) == 0xF029 {
             //sets index register to sprite address of char in Vx (FX29)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //update index register
             index_register = ((registers[reg_num] & 0x0F) as u16) * 5;
@@ -547,7 +547,7 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF0FF) == 0xF033 {
             //store bcd representation of Vx in I, I+1, and I+2 (FX33)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //update index register
             memory[(index_register) as usize] = registers[reg_num]/100;
@@ -556,7 +556,7 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF0FF) == 0xF055 {
             //store V0 to Vx in index register to index register + X (FX55)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //update index register
             for i in 0..(reg_num + 1) {
@@ -565,7 +565,7 @@ fn main() -> Result<(), String> {
         }else if (opcode & 0xF0FF) == 0xF065 {
             //fill V0 to Vx from index register to index register + X (FX65)
             //get register number
-            let reg_num:usize = ((opcode & 0x0F00) >> 0x8) as usize;
+            let reg_num : usize = ((opcode & 0x0F00) >> 0x8) as usize;
 
             //update index register
             for i in 0..(reg_num + 1) {
@@ -589,7 +589,7 @@ fn main() -> Result<(), String> {
             //loop through each pixel in line and draw
             for x in 0..(64 as usize) {
                 //get pixel value and draw
-                let pixel:u8 = display[y*64 + x];
+                let pixel: u8 = display[y*64 + x];
                 if pixel > 0 {
                     let _= canvas.fill_rect(Rect::new((x * 20) as i32, (y * 20) as i32, 20, 20));
                 }

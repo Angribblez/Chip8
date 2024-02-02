@@ -1,6 +1,9 @@
 # Chip8 Emulator
 An emulator for Chip8 built in rust with slight timer modifications
 
+## How to run
+```$ cargo run -- rom_name.rom```
+
 ## Tools
 This emulator was programmed in Rust using SDL2
 
