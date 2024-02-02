@@ -1,2 +1,4 @@
-*.rom
+/target
 .vscode
+Cargo.lock
+*.rom
