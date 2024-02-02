@@ -1,30 +1,27 @@
 //use declarations
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use std::time::Duration;
 use std::env;
 use std::fs;
 
-//methods
-fn draw_screen(display:&[u8; 0x800]){
-    //loop through each pixel line
-    for y in 0..(32 as usize) {
-        //loop through each pixel in line and draw
-        for x in 0..(64 as usize) {
-            //get pixel value and draw
-            let pixel:u8 = display[y*64 + x];
-            if pixel > 0 {
-                print!("#");
-            }else{
-                print!(" ");
-            }
-        }
-
-        //draw new line
-        println!();
-    }
-    println!();
-}
-
 //main method
-fn main() {
+fn main() -> Result<(), String> {
+    //graphics and input setup
+    let sdl_context:sdl2::Sdl = sdl2::init()?;
+    let video_subsystem:sdl2::VideoSubsystem = sdl_context.video()?;
+    let window:sdl2::video::Window = video_subsystem.window("Chip 8 Emulator", 1280, 640)
+        .position_centered()
+        .build()
+        .expect("could not initialize video subsystem");
+    let mut canvas:sdl2::render::Canvas<sdl2::video::Window> = window.into_canvas().build()
+        .expect("could not make a canvas");
+    canvas.clear();
+    canvas.present();
+    let mut event_pump = sdl_context.event_pump()?;
+
     //emulated memory setup
     let mut memory:[u8; 0x1000] = [0; 0x1000];
     let mut display:[u8; 0x800] = [0; 0x800];
@@ -61,7 +58,19 @@ fn main() {
     }
 
     //opcode loop
-    loop {
+    let mut should_run:bool = true;
+    while should_run {
+        //input handling
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit {..} |
+                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    should_run = false;
+                },
+                _ => {}
+            }
+        }
+
         //load 2 byte opcode
         let opcode = ((memory[program_counter] as u16) << 8) | (memory[program_counter+1] as u16);
 
@@ -72,9 +81,6 @@ fn main() {
             for i in 0..0xFF {
                 display[i as usize] = 0x00;
             }
-
-            //redraw
-            draw_screen(&display);
         }else if (opcode & 0xF000) == 0x1000 {
             //jump (1NNN)
             program_counter = ((opcode & 0x0FFF) - 2) as usize;
@@ -142,12 +148,33 @@ fn main() {
                     break;
                 }
             }
-
-            //redraw screen
-            draw_screen(&display);
         }
 
         //increment program counter
         program_counter += 2;
+
+        //redraw screen
+        //clear canvas as black, and set color to white
+        canvas.set_draw_color(Color::RGB(0, 0, 0));
+        canvas.clear();
+        canvas.set_draw_color(Color::RGB(255, 255, 255));
+
+        //loop through each pixel line
+        for y in 0..(32 as usize) {
+            //loop through each pixel in line and draw
+            for x in 0..(64 as usize) {
+                //get pixel value and draw
+                let pixel:u8 = display[y*64 + x];
+                if pixel > 0 {
+                    let _= canvas.fill_rect(Rect::new((x * 20) as i32, (y * 20) as i32, 20, 20));
+                }
+            }
+        }
+
+        //canvas redisplay and sleep
+        canvas.present();
+        ::std::thread::sleep(Duration::new(0, 2_000_000_u32));
     }
+
+    Ok(())
 }

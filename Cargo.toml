@@ -1,8 +1,9 @@
 [package]
-name = "chip8 emulator"
-version = "0.2.0"
+name = "chip8_emulator"
+version = "0.3.0"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+sdl2 = "*"
