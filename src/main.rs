@@ -76,8 +76,8 @@ fn main() -> Result<(), String> {
     let mut index_register: u16 = 0x0;
     let mut stack: [usize; 0xFF] = [0; 0xFF];
     let mut stack_index: usize = 0x0;
-    let mut delay_timer: u8 = 0xFF;
-    let mut sound_timer: u8 = 0xFF;
+    let mut delay_timer: u8 = 0x0;
+    let mut sound_timer: u8 = 0x0;
     let mut input: [u8; 0x10] = [0; 0x10];
 
     //font setup
@@ -704,10 +704,10 @@ fn main() -> Result<(), String> {
         //timer management
         if timer_counter == 7 {
             if delay_timer > 0 {
-                delay_timer -= 1;
+                delay_timer = delay_timer.wrapping_sub(1);
             }
             if sound_timer > 0 {
-                sound_timer -= 1;
+                sound_timer = sound_timer.wrapping_sub(1);
             }
             timer_counter = 0;
         } else {
